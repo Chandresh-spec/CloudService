@@ -1,0 +1,49 @@
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+
+    container_name: backend_container
+
+    env_file:
+      - ./backend/.env
+
+    ports:
+      - "8000:8000"
+    
+    depends_on:
+        postgresql:
+          condition: service_healthy
+
+  redis:
+    image: redis:7-alpine
+    container_name: redis_container
+    ports:
+      - "6379:6379"
+
+  postgresql:
+      image: postgres:17
+
+      container_name: postgres_container
+
+      environment:
+           POSTGRES_USER: postgres
+           POSTGRES_PASSWORD: password
+           POSTGRES_DB: cloud_storage
+      
+      
+      ports:
+        - "5432:54332"
+      volumes:
+        -  postgres_data:/var/lib/postgresql/data
+      healthcheck:
+        test: ["CMD-SHELL","pg_isready  -U postgres -d cloud_storage"]
+        interval: 5s
+        timeout: 5s
+        retries: 3
+        
+
+
+volumes:
+  postgres_data:
