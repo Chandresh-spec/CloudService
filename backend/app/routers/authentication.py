@@ -90,13 +90,14 @@ async def register(
 
 @auth_router.post('/verify_otp')
 async def verify_otp(body:OtpBodyIn,svc:Otp=Depends(get_otp_service),db:AsyncSession=Depends(get_db_async)):
-    email=body.email.strip()
+    email=body.email.strip().lower()
 
-    result=await svc.verify_script(email)
+    result=await svc.verify_otp(email,body.otp)
 
-    print(result)
+ 
 
     if result == VerifyResult.EXPIRED:
+        
         raise HTTPException(400,detail="Code is expired")
 
     if result == VerifyResult.LOCKED:
@@ -108,6 +109,12 @@ async def verify_otp(body:OtpBodyIn,svc:Otp=Depends(get_otp_service),db:AsyncSes
     stmt = select(User).where(User.email == email)
     result = await db.execute(stmt)
     user=result.scalar_one_or_none()
+
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="User Not Found"
+        )
 
     user.is_verified=True
 

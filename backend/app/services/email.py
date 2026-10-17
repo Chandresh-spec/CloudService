@@ -19,7 +19,7 @@ if attempts ==1 then redis.call('EXPIRE',KEYS[2],tonumber(ARGV[1])) end
 
 if attempts > tonumber(ARGV[2]) then
    redis.call('DEL',KEYS[1],KEYS[2])
-   return -1
+   return -2
 
 end
 
@@ -40,7 +40,7 @@ class VerifyResult(Enum):
 
 
 def _kind(kind:str,email:str):
-    return f"opt:{kind}:{email}"
+    return f"otp:{kind}:{email}"
 
 def generate_otp():
     return f"{secrets.randbelow(10*6):06d}"
@@ -74,17 +74,20 @@ class Otp():
         pipe.set(_kind("code",email),hash_otp(email,otp),ex=settings.otp_time_limit)
         pipe.delete(_kind("attempts",email))
 
-        pipe.execute()
+        await pipe.execute()
         return otp
 
     async def verify_otp(self,email,otp):
         res=await self.verify_script(
             keys=[_kind("code",email),
                   _kind("attempts",email)],
-            args=[settings.attempts_timeout,settings.max_attempts,otp]
+            args=[settings.attempts_timeout,
+                  settings.max_attempts,
+                  hash_otp(email,otp)],
         )
-        print(res)
+        
 
+        print( VerifyResult(res))
         return VerifyResult(res)
 
         
