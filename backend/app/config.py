@@ -10,6 +10,14 @@ class Settings(BaseSettings):
     pool_pre_ping:True
     pool_timeout:int
     pool_recycle:int  
+    redis_url:str
+    otp_cooldown:int=150
+    sends_cooldown:int
+    otp_time_limit:int
+    max_hourly_limit:int
+    attempts_timeout:int=120
+    max_attempts:int=2
+    otp_secret:str="my name is fast"
 
 
 

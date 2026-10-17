@@ -3,14 +3,35 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
+    
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 
     container_name: backend_container
+
+
 
     env_file:
       - ./backend/.env
 
     ports:
       - "8000:8000"
+
+    develop:
+       watch:
+          - action: sync
+            path:  ./backend/app/
+            target: /app/app
+
+            ignore: 
+              - __pycache__
+              - "*.pyc"
+
+            
+          
+          - action: rebuild
+            path: ./backend/requirements.txt
+
+
     
     depends_on:
         postgresql:
@@ -47,3 +68,5 @@ services:
 
 volumes:
   postgres_data:
+
+

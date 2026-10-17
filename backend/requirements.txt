@@ -1,4 +1,9 @@
 uvicorn
 fastapi
-sqlalchemy
+sqlalchemy[asyncio]
 pydantic_settings
+psycopg[binary]
+redis
+alembic
+pwdlib[argon2]
+pydantic[email]
